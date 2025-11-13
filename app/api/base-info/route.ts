@@ -18,10 +18,12 @@ export async function GET() {
       baseId: process.env.AIRTABLE_BASE_ID
     })
   } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : String(error)
+    const errorType = error instanceof Error ? error.constructor.name : 'Unknown'
     return Response.json({
       success: false,
-      error: error.message,
-      errorType: error.constructor.name,
+      error: errorMessage,
+      errorType: errorType,
       apiKey: process.env.AIRTABLE_API_KEY ? "Present" : "Missing",
       baseId: process.env.AIRTABLE_BASE_ID ? "Present" : "Missing"
     }, { status: 500 })
