@@ -298,7 +298,7 @@ export default function ViewRecordPage() {
                 ))}
               </div>
               <div className="flex flex-wrap gap-1">
-                {items.map((item, index) => (
+                {items.map((item: string, index: number) => (
                   <span key={index} className="text-xs bg-black text-white px-2 py-1 rounded hebrew-text">
                     {item}
                   </span>
@@ -309,7 +309,7 @@ export default function ViewRecordPage() {
             <div className="p-2 bg-gray-50 rounded">
               {items.length > 0 ? (
                 <div className="flex flex-wrap gap-1">
-                  {items.map((item, index) => (
+                  {items.map((item: string, index: number) => (
                     <span key={index} className="text-xs bg-black text-white px-2 py-1 rounded hebrew-text">
                       {item}
                     </span>
@@ -351,7 +351,7 @@ export default function ViewRecordPage() {
                 ))}
               </div>
               <div className="flex flex-wrap gap-1">
-                {items.map((item, index) => (
+                {items.map((item: string, index: number) => (
                   <span key={index} className="text-xs bg-black text-white px-2 py-1 rounded hebrew-text">
                     {item}
                   </span>
@@ -362,7 +362,7 @@ export default function ViewRecordPage() {
             <div className="p-2 bg-gray-50 rounded">
               {items.length > 0 ? (
                 <div className="flex flex-wrap gap-1">
-                  {items.map((item, index) => (
+                  {items.map((item: string, index: number) => (
                     <span key={index} className="text-xs bg-black text-white px-2 py-1 rounded hebrew-text">
                       {item}
                     </span>
