@@ -18,10 +18,12 @@ export async function GET() {
       sampleRecord: records[0]?.fields
     })
   } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : String(error)
+    const errorType = error instanceof Error ? error.constructor.name : 'Unknown'
     return NextResponse.json({
       success: false,
-      error: error.message,
-      errorType: error.constructor.name,
+      error: errorMessage,
+      errorType: errorType,
       tableName: 'Mia-data'
     }, { status: 500 })
   }

@@ -18,11 +18,13 @@ export async function GET() {
       allFields: testRecord.fields
     })
   } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : String(error)
+    const errorType = error instanceof Error ? error.constructor.name : 'Unknown'
     return NextResponse.json({
       success: false,
-      error: error.message,
-      errorType: error.constructor.name,
-      details: error.toString()
+      error: errorMessage,
+      errorType: errorType,
+      details: error instanceof Error ? error.toString() : String(error)
     }, { status: 500 })
   }
 }
