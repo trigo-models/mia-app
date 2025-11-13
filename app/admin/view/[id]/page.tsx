@@ -287,7 +287,7 @@ export default function ViewRecordPage() {
                     variant={items.includes(leader) ? "default" : "outline"}
                     onClick={() => {
                       const newItems = items.includes(leader) 
-                        ? items.filter(item => item !== leader)
+                        ? items.filter((item: string) => item !== leader)
                         : [...items, leader]
                       updateField(fieldName, newItems)
                     }}
@@ -340,7 +340,7 @@ export default function ViewRecordPage() {
                     variant={items.includes(member) ? "default" : "outline"}
                     onClick={() => {
                       const newItems = items.includes(member) 
-                        ? items.filter(item => item !== member)
+                        ? items.filter((item: string) => item !== member)
                         : [...items, member]
                       updateField(fieldName, newItems)
                     }}
