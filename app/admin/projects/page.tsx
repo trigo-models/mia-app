@@ -274,7 +274,7 @@ export default function AdminProjectsPage() {
     {
       key: 'actions',
       header: 'פעולות',
-      align: 'center',
+      align: 'center' as const,
       render: (project: Project) => (
         <div className="flex items-center justify-center gap-1">
           <Link href={`/admin/projects/${project.id}`}>
