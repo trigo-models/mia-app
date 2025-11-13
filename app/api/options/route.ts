@@ -1,0 +1,49 @@
+import { NextResponse } from 'next/server'
+import { supabase } from '@/lib/supabase'
+
+export async function GET() {
+  try {
+    // Fetch all options from Supabase - using lowercase 'name' to match actual schema
+    const [factoriesRes, leadersRes, teamRes, projectsRes] = await Promise.all([
+      supabase.from('factory_name').select('name'),
+      supabase.from('leaders').select('name'),
+      supabase.from('team').select('name'),
+      supabase.from('projects').select('id, project_name, project_number, factory_name').then(r => {
+        if (r.data) {
+          r.data = r.data.map((p: any) => ({
+            id: p.id,
+            name: p.project_name,
+            project_number: p.project_number,
+            factory_name: p.factory_name
+          }))
+        }
+        return r
+      }).catch(e => ({ data: [], error: e }))
+    ])
+
+    // Log any errors
+    if (factoriesRes.error) console.error('Factories error:', factoriesRes.error)
+    if (leadersRes.error) console.error('Leaders error:', leadersRes.error)
+    if (teamRes.error) console.error('Team error:', teamRes.error)
+    if (projectsRes.error) console.error('Projects error:', projectsRes.error)
+
+    const factories = factoriesRes.data?.map(r => r.name) || []
+    const teamLeaders = leadersRes.data?.map(r => r.name) || []
+    const teamMembers = teamRes.data?.map(r => r.name) || []
+    const projects = projectsRes.data || []
+
+    return NextResponse.json({
+      factories,
+      teamLeaders,
+      teamMembers,
+      owners: teamLeaders, // Owners come from Leaders table
+      projects
+    })
+  } catch (error: any) {
+    console.error('Error fetching options:', error)
+    return NextResponse.json(
+      { error: 'Failed to fetch options', details: error.message },
+      { status: 500 }
+    )
+  }
+}

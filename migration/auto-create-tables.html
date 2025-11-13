@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Auto Create Supabase Tables</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            border-bottom: 3px solid #3ECF8E;
+            padding-bottom: 10px;
+        }
+        .step {
+            margin: 20px 0;
+            padding: 15px;
+            background: #f8f9fa;
+            border-left: 4px solid #3ECF8E;
+        }
+        button {
+            background: #3ECF8E;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            font-size: 16px;
+            cursor: pointer;
+            border-radius: 5px;
+            margin: 10px 5px;
+        }
+        button:hover {
+            background: #2EB875;
+        }
+        .sql-box {
+            background: #1e1e1e;
+            color: #d4d4d4;
+            padding: 15px;
+            border-radius: 5px;
+            max-height: 400px;
+            overflow: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+        }
+        .success {
+            color: #3ECF8E;
+            font-weight: bold;
+        }
+        .error {
+            color: #ff6b6b;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🚀 Automatic Supabase Table Creator</h1>
+        <p>Click the button below to automatically create all tables in your Supabase database!</p>
+        
+        <div class="step">
+            <h3>Step 1: Load SQL</h3>
+            <button onclick="loadSQL()">📁 Load SQL Content</button>
+            <p id="sql-status"></p>
+        </div>
+        
+        <div class="step">
+            <h3>Step 2: Execute SQL</h3>
+            <button onclick="executeSQL()">▶️ Execute SQL in Supabase</button>
+            <p id="exec-status"></p>
+        </div>
+        
+        <div class="step">
+            <h3>SQL Preview:</h3>
+            <div class="sql-box" id="sql-preview">Click "Load SQL" to see the SQL commands...</div>
+        </div>
+        
+        <div class="step">
+            <h3>Manual Alternative:</h3>
+            <p>If automatic execution doesn't work, copy the SQL above and paste it into:</p>
+            <a href="https://tcuzxchvkuryprwnljqfl.supabase.co/project/_/sql/new" target="_blank">
+                <button>🔗 Open Supabase SQL Editor</button>
+            </a>
+        </div>
+    </div>
+
+    <script>
+        let sqlContent = '';
+        
+        async function loadSQL() {
+            try {
+                const response = await fetch('create-supabase-schema.sql');
+                if (!response.ok) {
+                    throw new Error('Failed to load SQL file. Please open this HTML file from the migration folder.');
+                }
+                sqlContent = await response.text();
+                document.getElementById('sql-preview').textContent = sqlContent;
+                document.getElementById('sql-status').innerHTML = '<span class="success">✅ SQL loaded successfully!</span>';
+            } catch (error) {
+                document.getElementById('sql-status').innerHTML = '<span class="error">❌ Error: ' + error.message + '</span>';
+                document.getElementById('sql-preview').textContent = 'Unable to load SQL. Please use the manual method (Step 3).';
+            }
+        }
+        
+        async function executeSQL() {
+            if (!sqlContent) {
+                document.getElementById('exec-status').innerHTML = '<span class="error">Please load SQL first!</span>';
+                return;
+            }
+            
+            document.getElementById('exec-status').innerHTML = '⏳ Executing...';
+            
+            try {
+                // Note: We can't execute SQL directly from browser due to CORS and security
+                // So we'll open the Supabase editor and pre-populate it
+                const encodedSQL = encodeURIComponent(sqlContent);
+                const url = `https://tcuzxchvkuryprwnljqfl.supabase.co/project/_/sql/new?sql=${encodedSQL}`;
+                
+                document.getElementById('exec-status').innerHTML = `
+                    <span class="error">❌ Cannot execute SQL directly from browser.</span>
+                    <br><br>
+                    <p>Please use the manual method:</p>
+                    <ol>
+                        <li>Copy the SQL from the preview above</li>
+                        <li>Click "Open Supabase SQL Editor" button</li>
+                        <li>Paste and click RUN</li>
+                    </ol>
+                `;
+            } catch (error) {
+                document.getElementById('exec-status').innerHTML = '<span class="error">❌ Error: ' + error.message + '</span>';
+            }
+        }
+        
+        // Automatically load SQL when page loads
+        window.onload = loadSQL;
+    </script>
+</body>
+</html>
+
+
+
+
+

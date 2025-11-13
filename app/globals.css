@@ -1,0 +1,90 @@
+@import url('https://fonts.googleapis.com/css2?family=Rubik:wght@300;400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 0 0% 0%;
+    --card: 0 0% 100%;
+    --card-foreground: 0 0% 0%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 0 0% 0%;
+    --primary: 0 0% 0%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 0 0% 96%;
+    --secondary-foreground: 0 0% 0%;
+    --muted: 0 0% 96%;
+    --muted-foreground: 0 0% 45%;
+    --accent: 0 0% 96%;
+    --accent-foreground: 0 0% 0%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 0 0% 90%;
+    --input: 0 0% 90%;
+    --ring: 0 0% 0%;
+    --radius: 0.5rem;
+    --font-rubik: 'Rubik', 'Arial Hebrew', sans-serif;
+  }
+
+  .dark {
+    --background: 0 0% 0%;
+    --foreground: 0 0% 98%;
+    --card: 0 0% 0%;
+    --card-foreground: 0 0% 98%;
+    --popover: 0 0% 0%;
+    --popover-foreground: 0 0% 98%;
+    --primary: 0 0% 98%;
+    --primary-foreground: 0 0% 0%;
+    --secondary: 0 0% 15%;
+    --secondary-foreground: 0 0% 98%;
+    --muted: 0 0% 15%;
+    --muted-foreground: 0 0% 65%;
+    --accent: 0 0% 15%;
+    --accent-foreground: 0 0% 98%;
+    --destructive: 0 62% 30%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 0 0% 15%;
+    --input: 0 0% 15%;
+    --ring: 0 0% 98%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+    font-family: 'Rubik', 'Arial Hebrew', sans-serif;
+  }
+  body {
+    @apply bg-background text-foreground font-sans;
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
+}
+
+/* RTL specific styles */
+[dir="rtl"] {
+  text-align: right;
+}
+
+[dir="rtl"] .rtl\:text-right {
+  text-align: right;
+}
+
+[dir="rtl"] .rtl\:text-left {
+  text-align: left;
+}
+
+/* Mobile first responsive design */
+@media (max-width: 640px) {
+  .mobile-padding {
+    @apply px-4 py-6;
+  }
+}
+
+/* Hebrew font optimization */
+.hebrew-text {
+  font-family: var(--font-rubik), 'Arial Hebrew', sans-serif;
+  font-feature-settings: "liga" 1, "calt" 1;
+}
