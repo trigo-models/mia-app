@@ -67,8 +67,8 @@ export async function GET() {
     for (const record of records) {
       const supabaseRecord: any = {
         airtable_id: record.id,
-        created_at: record.createdTime,
-        fac_name: record.fields.fac_name,
+        created_at: (record as any).createdTime,
+        fac_name: (record.fields as any).fac_name,
         element: record.fields.element,
         r_comments: record.fields.r_comments,
         r_leaders: record.fields.r_leaders,
