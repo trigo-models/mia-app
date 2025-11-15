@@ -3,18 +3,38 @@ import { supabase } from '@/lib/supabase'
 
 export async function GET() {
   try {
+    // Check if Supabase is configured
+    if (!process.env.SUPABASE_URL || !process.env.SUPABASE_ANON_KEY) {
+      return NextResponse.json({
+        success: false,
+        error: 'Supabase environment variables are not configured'
+      }, { status: 500 })
+    }
+
+    console.log('Fetching projects from Supabase...')
+    console.log('Supabase URL:', process.env.SUPABASE_URL?.substring(0, 30) + '...')
+    
     const { data: projects, error } = await supabase
       .from('projects')
       .select('*')
       .order('created_at', { ascending: false })
 
     if (error) {
+      console.error('Supabase error:', error)
       throw error
+    }
+
+    console.log(`Fetched ${projects?.length || 0} projects from Supabase`)
+    if (projects && projects.length > 0) {
+      console.log('Sample project IDs:', projects.slice(0, 3).map(p => p.id))
+      console.log('Sample project names:', projects.slice(0, 3).map(p => p.project_name))
     }
 
     const response = NextResponse.json({
       success: true,
-      projects: projects || []
+      projects: projects || [],
+      count: projects?.length || 0,
+      supabaseUrl: process.env.SUPABASE_URL?.substring(0, 30) + '...' // For debugging
     })
     
     // Prevent caching to ensure fresh data

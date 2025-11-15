@@ -55,6 +55,16 @@ export async function GET() {
     const teamLeaders = leadersRes.data?.map(r => r.name) || []
     const teamMembers = teamRes.data?.map(r => r.name) || []
     const projects = projectsRes.data || []
+    
+    // Log what we're returning for debugging
+    console.log('Options API - Returning:', {
+      factoriesCount: factories.length,
+      teamLeadersCount: teamLeaders.length,
+      teamMembersCount: teamMembers.length,
+      projectsCount: projects.length,
+      projectIds: projects.map((p: any) => p.id),
+      projectNames: projects.map((p: any) => p.name)
+    })
 
     // If there are errors but we got some data, still return it
     // If all failed, return error
