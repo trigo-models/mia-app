@@ -1,18 +1,20 @@
 import { NextResponse } from 'next/server'
-import Airtable from 'airtable'
-
-const base = new Airtable({
-  apiKey: process.env.AIRTABLE_API_KEY!,
-}).base(process.env.AIRTABLE_BASE_ID!)
+import { supabase } from '@/lib/supabase'
 
 export async function POST() {
   try {
     // Try to create a record with just one field
-    const record = await base('Mia-data').create({
-      fields: {
-        'fac_name': 'Test Factory'
-      }
-    })
+    const { data: record, error } = await supabase
+      .from('mia_data')
+      .insert({
+        fac_name: 'Test Factory'
+      })
+      .select()
+      .single()
+    
+    if (error) {
+      throw error
+    }
     
     return NextResponse.json({
       success: true,
