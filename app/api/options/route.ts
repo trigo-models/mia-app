@@ -8,17 +8,20 @@ export async function GET() {
       supabase.from('factory_name').select('name'),
       supabase.from('leaders').select('name'),
       supabase.from('team').select('name'),
-      supabase.from('projects').select('id, project_name, project_number, factory_name').then(r => {
+      supabase.from('projects').select('id, project_name, project_number, factory_name').then((r: any) => {
         if (r.data) {
-          r.data = r.data.map((p: any) => ({
-            id: p.id,
-            name: p.project_name,
-            project_number: p.project_number,
-            factory_name: p.factory_name
-          }))
+          return {
+            ...r,
+            data: r.data.map((p: any) => ({
+              id: p.id,
+              name: p.project_name,
+              project_number: p.project_number,
+              factory_name: p.factory_name
+            }))
+          }
         }
         return r
-      }).catch(e => ({ data: [], error: e }))
+      }).catch((e: any) => ({ data: [], error: e }))
     ])
 
     // Log any errors
