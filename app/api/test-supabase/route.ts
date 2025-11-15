@@ -20,7 +20,7 @@ export async function GET() {
     }
     
     // Try a simple connection test
-    let connectionTestResult = { success: false, error: null }
+    let connectionTestResult: { success: boolean; error: string | null } = { success: false, error: null }
     try {
       // Try to ping the Supabase REST API directly
       const testUrl = `${process.env.SUPABASE_URL}/rest/v1/`
