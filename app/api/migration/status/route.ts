@@ -2,11 +2,18 @@ import { NextResponse } from 'next/server'
 import { supabase } from '@/lib/supabase'
 import Airtable from 'airtable'
 
-const airtableBase = new Airtable({
-  apiKey: process.env.AIRTABLE_API_KEY!,
-}).base(process.env.AIRTABLE_BASE_ID!)
-
 export async function GET() {
+  // Lazy initialization to avoid build-time errors
+  if (!process.env.AIRTABLE_API_KEY || !process.env.AIRTABLE_BASE_ID) {
+    return NextResponse.json({
+      success: false,
+      error: 'Airtable environment variables are not configured'
+    }, { status: 500 })
+  }
+  
+  const airtableBase = new Airtable({
+    apiKey: process.env.AIRTABLE_API_KEY,
+  }).base(process.env.AIRTABLE_BASE_ID)
   try {
     const stats = {
       airtable: {
@@ -52,6 +59,7 @@ export async function GET() {
     }, { status: 500 })
   }
 }
+
 
 
 

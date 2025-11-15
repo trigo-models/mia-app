@@ -1,13 +1,17 @@
 import { NextResponse } from 'next/server'
-import Airtable from 'airtable'
-
-const base = new Airtable({
-  apiKey: process.env.AIRTABLE_API_KEY!,
-}).base(process.env.AIRTABLE_BASE_ID!)
+import { supabase } from '@/lib/supabase'
 
 export async function GET() {
   try {
-    // Try to create a record with just one field to see what works
+    // Check if Supabase is configured
+    if (!process.env.SUPABASE_URL || !process.env.SUPABASE_ANON_KEY) {
+      return NextResponse.json({
+        success: false,
+        error: 'Supabase environment variables are not configured'
+      }, { status: 500 })
+    }
+
+    // Try to test fields by checking the table structure
     const testFields = [
       'fac_name',
       'element', 
@@ -22,32 +26,41 @@ export async function GET() {
     
     const results: Record<string, any> = {}
     
+    // Get a sample record to check which fields exist
+    const { data: sampleRecord, error: fetchError } = await supabase
+      .from('mia_data')
+      .select('*')
+      .limit(1)
+      .maybeSingle()
+    
+    if (fetchError) {
+      return NextResponse.json({
+        success: false,
+        error: fetchError.message,
+        errorType: 'SupabaseError'
+      }, { status: 500 })
+    }
+    
+    // Check which fields exist in the table
+    const existingFields = sampleRecord ? Object.keys(sampleRecord) : []
+    
     for (const fieldName of testFields) {
-      try {
-        const record = await base('Mia-data').create({
-          [fieldName]: 'test'
-        })
-        results[fieldName] = { success: true, recordId: (record as any).id }
-        // Delete the test record
-        await base('Mia-data').destroy((record as any).id)
-      } catch (error) {
-        results[fieldName] = { 
-          success: false, 
-          error: (error as any).message,
-          errorType: (error as any).constructor.name
-        }
+      results[fieldName] = {
+        success: existingFields.includes(fieldName),
+        exists: existingFields.includes(fieldName)
       }
     }
     
     return NextResponse.json({
       success: true,
-      fieldTests: results
+      fieldTests: results,
+      existingFields: existingFields
     })
   } catch (error) {
     return NextResponse.json({
       success: false,
-      error: (error as any).message,
-      errorType: (error as any).constructor.name
+      error: error instanceof Error ? error.message : String(error),
+      errorType: error instanceof Error ? error.constructor.name : 'Unknown'
     }, { status: 500 })
   }
 }

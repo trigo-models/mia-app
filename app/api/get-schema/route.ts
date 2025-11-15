@@ -1,12 +1,20 @@
 import { NextResponse } from 'next/server'
 import Airtable from 'airtable'
 
-const base = new Airtable({
-  apiKey: process.env.AIRTABLE_API_KEY!,
-}).base(process.env.AIRTABLE_BASE_ID!)
-
 export async function GET() {
   try {
+    // Lazy initialization to avoid build-time errors
+    if (!process.env.AIRTABLE_API_KEY || !process.env.AIRTABLE_BASE_ID) {
+      return NextResponse.json({
+        success: false,
+        error: 'Airtable environment variables are not configured'
+      }, { status: 500 })
+    }
+    
+    const base = new Airtable({
+      apiKey: process.env.AIRTABLE_API_KEY,
+    }).base(process.env.AIRTABLE_BASE_ID)
+    
     // Try to get the table schema by creating a minimal record
     const testRecord = await base('Mia-data').create({})
     
