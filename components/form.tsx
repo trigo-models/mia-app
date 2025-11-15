@@ -32,7 +32,7 @@ interface ClauseOption {
   description?: string | null
 }
 
-type MeasurementUnit = 'משקל' | 'מטר רבוע' | 'מטר אורך' | 'יחידה' | ''
+type MeasurementUnit = 'טון' | 'מטר רבוע' | 'מטר אורך' | 'יחידה' | ''
 
 interface ManpowerPerson {
   localId: string
