@@ -8,9 +8,9 @@ const airtableBase = new Airtable({
 
 export async function GET() {
   const results = {
-    factories: { count: 0, success: false },
-    leaders: { count: 0, success: false },
-    team: { count: 0, success: false },
+    factories: { count: 0, success: false, errors: [] as string[] },
+    leaders: { count: 0, success: false, errors: [] as string[] },
+    team: { count: 0, success: false, errors: [] as string[] },
     mia_data: { count: 0, success: false, errors: [] as string[] }
   }
 
@@ -26,7 +26,7 @@ export async function GET() {
     }
     results.factories.success = true
   } catch (error: any) {
-    results.factories.errors.push(error.message)
+    results.factories.errors.push(error instanceof Error ? error.message : String(error))
   }
 
   // Migrate leaders
@@ -41,7 +41,7 @@ export async function GET() {
     }
     results.leaders.success = true
   } catch (error: any) {
-    results.leaders.errors.push(error.message)
+    results.leaders.errors.push(error instanceof Error ? error.message : String(error))
   }
 
   // Migrate team
@@ -56,7 +56,7 @@ export async function GET() {
     }
     results.team.success = true
   } catch (error: any) {
-    results.team.errors.push(error.message)
+    results.team.errors.push(error instanceof Error ? error.message : String(error))
   }
 
   // Migrate Mia-data
@@ -106,7 +106,7 @@ export async function GET() {
     }
     results.mia_data.success = results.mia_data.errors.length === 0
   } catch (error: any) {
-    results.mia_data.errors.push(error.message)
+    results.mia_data.errors.push(error instanceof Error ? error.message : String(error))
   }
 
   return NextResponse.json({
@@ -115,6 +115,7 @@ export async function GET() {
     message: 'Migration completed. Check results for any errors.'
   })
 }
+
 
 
 
