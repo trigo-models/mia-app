@@ -1,5 +1,13 @@
 import Airtable from 'airtable'
 
+type TableResult = {
+  exists: boolean
+  recordCount?: number
+  fields?: string[]
+  sampleRecord?: any
+  error?: string
+}
+
 export async function GET() {
   try {
     const base = new Airtable({
@@ -22,7 +30,7 @@ export async function GET() {
       'אנשי צוות'
     ]
 
-    const results = {}
+    const results: Record<string, TableResult> = {}
     
     for (const tableName of tableNames) {
       try {
@@ -36,7 +44,7 @@ export async function GET() {
       } catch (error) {
         results[tableName] = {
           exists: false,
-          error: error.message
+          error: error instanceof Error ? error.message : String(error)
         }
       }
     }
@@ -49,8 +57,8 @@ export async function GET() {
   } catch (error) {
     return Response.json({
       success: false,
-      error: error.message,
-      errorType: error.constructor.name
+      error: error instanceof Error ? error.message : String(error),
+      errorType: error instanceof Error ? error.constructor.name : 'Unknown'
     }, { status: 500 })
   }
 }
