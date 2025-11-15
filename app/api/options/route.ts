@@ -32,23 +32,47 @@ export async function GET() {
         }
       : projectsResRaw
 
-    // Log any errors
-    if (factoriesRes.error) console.error('Factories error:', factoriesRes.error)
-    if (leadersRes.error) console.error('Leaders error:', leadersRes.error)
-    if (teamRes.error) console.error('Team error:', teamRes.error)
-    if (projectsRes.error) console.error('Projects error:', projectsRes.error)
+    // Log any errors and return them in response
+    const errors: any = {}
+    if (factoriesRes.error) {
+      console.error('Factories error:', factoriesRes.error)
+      errors.factories = factoriesRes.error.message
+    }
+    if (leadersRes.error) {
+      console.error('Leaders error:', leadersRes.error)
+      errors.leaders = leadersRes.error.message
+    }
+    if (teamRes.error) {
+      console.error('Team error:', teamRes.error)
+      errors.team = teamRes.error.message
+    }
+    if (projectsRes.error) {
+      console.error('Projects error:', projectsRes.error)
+      errors.projects = projectsRes.error.message
+    }
 
     const factories = factoriesRes.data?.map(r => r.name) || []
     const teamLeaders = leadersRes.data?.map(r => r.name) || []
     const teamMembers = teamRes.data?.map(r => r.name) || []
     const projects = projectsRes.data || []
 
+    // If there are errors but we got some data, still return it
+    // If all failed, return error
+    if (Object.keys(errors).length > 0 && factories.length === 0 && teamLeaders.length === 0 && teamMembers.length === 0 && projects.length === 0) {
+      return NextResponse.json({
+        error: 'Failed to fetch options from Supabase',
+        details: errors,
+        message: 'Please check your Supabase connection and environment variables'
+      }, { status: 500 })
+    }
+
     return NextResponse.json({
       factories,
       teamLeaders,
       teamMembers,
       owners: teamLeaders, // Owners come from Leaders table
-      projects
+      projects,
+      ...(Object.keys(errors).length > 0 && { warnings: errors })
     })
   } catch (error: any) {
     console.error('Error fetching options:', error)

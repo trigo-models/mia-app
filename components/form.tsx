@@ -271,15 +271,34 @@ export default function MultiStepForm() {
       try {
         const response = await fetch('/api/options')
         const data = await response.json()
+        
+        if (!response.ok) {
+          console.error('API Error:', data)
+          if (data.error) {
+            console.error('Error message:', data.error)
+            console.error('Error details:', data.details)
+          }
+          return
+        }
+        
         if (data) {
-        setOptions({
-          factories: data.factories || [],
-          teamLeaders: data.teamLeaders || [],
-          teamMembers: data.teamMembers || [],
-          owners: data.owners || [],
-          projects: data.projects || []
-        })
-        console.log('Fetched projects:', data.projects)
+          setOptions({
+            factories: data.factories || [],
+            teamLeaders: data.teamLeaders || [],
+            teamMembers: data.teamMembers || [],
+            owners: data.owners || [],
+            projects: data.projects || []
+          })
+          console.log('Fetched options:', {
+            factories: data.factories?.length || 0,
+            teamLeaders: data.teamLeaders?.length || 0,
+            teamMembers: data.teamMembers?.length || 0,
+            projects: data.projects?.length || 0
+          })
+          
+          if (data.warnings) {
+            console.warn('Warnings from API:', data.warnings)
+          }
         }
       } catch (error) {
         console.error('Error fetching options:', error)
