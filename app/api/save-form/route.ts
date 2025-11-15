@@ -69,8 +69,8 @@ export async function POST(request: NextRequest) {
       addFieldSafely(fields, 'date_made', formData.dateMade)
     }
     if (formData.startTime) {
-      // Convert time to Airtable format with timezone adjustment
-      // Subtract 3 hours to compensate for Airtable's timezone conversion
+      // Convert time to ISO format with timezone adjustment
+      // Subtract 3 hours to compensate for timezone conversion
       const [hours, minutes] = formData.startTime.split(':')
       const adjustedHours = (parseInt(hours) - 3 + 24) % 24
       const adjustedTime = `${adjustedHours.toString().padStart(2, '0')}:${minutes}`
@@ -78,8 +78,8 @@ export async function POST(request: NextRequest) {
       addFieldSafely(fields, 'start_time', startDateTime)
     }
     if (formData.endTime) {
-      // Convert time to Airtable format with timezone adjustment
-      // Subtract 3 hours to compensate for Airtable's timezone conversion
+      // Convert time to ISO format with timezone adjustment
+      // Subtract 3 hours to compensate for timezone conversion
       const [hours, minutes] = formData.endTime.split(':')
       const adjustedHours = (parseInt(hours) - 3 + 24) % 24
       const adjustedTime = `${adjustedHours.toString().padStart(2, '0')}:${minutes}`
@@ -118,7 +118,7 @@ export async function POST(request: NextRequest) {
       }
     }
     
-        // Add new fields - these will be included if they exist in Airtable
+        // Add new fields - these will be included if they exist in the database
         if (formData.hasSteps !== undefined) {
           addFieldSafely(fields, 'is_steps', formData.hasSteps)
           if (formData.hasSteps && formData.stepQty) {

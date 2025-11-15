@@ -142,7 +142,7 @@ export default function ViewRecordPage() {
       // Filter out computed fields that cannot be updated
       const { ID, date_created, ...updatableFields } = record.fields
       
-      // Format multi-select fields properly for Airtable
+      // Format multi-select fields properly for the database
       const formattedFields = { ...updatableFields }
       
       // Get the original record to check which fields exist

@@ -9,7 +9,7 @@ export async function GET(
     const recordId = params.id
     console.log(`Fetching record with ID: ${recordId}`)
 
-    // Check if it's a UUID or Airtable ID
+    // Check if it's a UUID or legacy Airtable ID (from migration)
     const isUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(recordId)
     
     let query = supabase.from('mia_data').select('*')
@@ -18,7 +18,7 @@ export async function GET(
       // If it's a UUID, search by id field
       query = query.eq('id', recordId)
     } else {
-      // If it's an Airtable ID, search by airtable_id field
+      // If it's a legacy Airtable ID, search by airtable_id field
       query = query.eq('airtable_id', recordId)
     }
     
@@ -69,7 +69,7 @@ export async function PUT(
 
     console.log(`Updating record ${recordId} with fields:`, Object.keys(fields))
 
-    // Check if it's a UUID or Airtable ID
+    // Check if it's a UUID or legacy Airtable ID (from migration)
     const isUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(recordId)
     
     let query = supabase.from('mia_data').update(fields)
@@ -124,7 +124,7 @@ export async function DELETE(
     const recordId = params.id
     console.log(`Deleting record with ID: ${recordId}`)
 
-    // Check if it's a UUID or Airtable ID
+    // Check if it's a UUID or legacy Airtable ID (from migration)
     const isUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(recordId)
     
     let query = supabase.from('mia_data').delete()
