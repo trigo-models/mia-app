@@ -153,7 +153,7 @@ async function migrateMiaData() {
     const allRecords = records.map(record => ({
       id: record.id,
       fields: record.fields,
-      createdTime: record.createdTime
+      createdTime: (record as any).createdTime
     }))
     
     console.log(`\n  Total records to migrate: ${allRecords.length}\n`)
