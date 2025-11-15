@@ -4,25 +4,25 @@ import { supabase } from '@/lib/supabase'
 export async function GET() {
   try {
     // Fetch all options from Supabase - using lowercase 'name' to match actual schema
-    const [factoriesRes, leadersRes, teamRes, projectsRes] = await Promise.all([
+    const [factoriesRes, leadersRes, teamRes, projectsResRaw] = await Promise.all([
       supabase.from('factory_name').select('name'),
       supabase.from('leaders').select('name'),
       supabase.from('team').select('name'),
-      supabase.from('projects').select('id, project_name, project_number, factory_name').then((r: any) => {
-        if (r.data) {
-          return {
-            ...r,
-            data: r.data.map((p: any) => ({
-              id: p.id,
-              name: p.project_name,
-              project_number: p.project_number,
-              factory_name: p.factory_name
-            }))
-          }
-        }
-        return r
-      }).catch((e: any) => ({ data: [], error: e }))
+      supabase.from('projects').select('id, project_name, project_number, factory_name')
     ])
+    
+    // Transform projects data
+    const projectsRes = projectsResRaw.data
+      ? {
+          ...projectsResRaw,
+          data: projectsResRaw.data.map((p: any) => ({
+            id: p.id,
+            name: p.project_name,
+            project_number: p.project_number,
+            factory_name: p.factory_name
+          }))
+        }
+      : projectsResRaw
 
     // Log any errors
     if (factoriesRes.error) console.error('Factories error:', factoriesRes.error)
