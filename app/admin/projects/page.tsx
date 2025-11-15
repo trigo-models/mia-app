@@ -62,7 +62,12 @@ export default function AdminProjectsPage() {
   const fetchProjects = async () => {
     try {
       setLoading(true)
-      const response = await fetch('/api/projects')
+      const response = await fetch(`/api/projects?t=${Date.now()}`, {
+        cache: 'no-store',
+        headers: {
+          'Cache-Control': 'no-cache'
+        }
+      })
       const data = await response.json()
       
       if (data.success) {
@@ -77,7 +82,12 @@ export default function AdminProjectsPage() {
 
   const fetchOptions = async () => {
     try {
-      const response = await fetch('/api/options')
+      const response = await fetch(`/api/options?t=${Date.now()}`, {
+        cache: 'no-store',
+        headers: {
+          'Cache-Control': 'no-cache'
+        }
+      })
       const data = await response.json()
       
       if (data.factories) {
@@ -98,10 +108,12 @@ export default function AdminProjectsPage() {
 
     setSubmitting(true)
     try {
-      const response = await fetch('/api/projects', {
+      const response = await fetch(`/api/projects?t=${Date.now()}`, {
         method: 'POST',
+        cache: 'no-store',
         headers: {
           'Content-Type': 'application/json',
+          'Cache-Control': 'no-cache'
         },
         body: JSON.stringify(formData),
       })

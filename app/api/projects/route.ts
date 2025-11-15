@@ -12,10 +12,17 @@ export async function GET() {
       throw error
     }
 
-    return NextResponse.json({
+    const response = NextResponse.json({
       success: true,
       projects: projects || []
     })
+    
+    // Prevent caching to ensure fresh data
+    response.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate')
+    response.headers.set('Pragma', 'no-cache')
+    response.headers.set('Expires', '0')
+    
+    return response
   } catch (error: any) {
     console.error('Error fetching projects:', error)
     return NextResponse.json({

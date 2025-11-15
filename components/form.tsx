@@ -271,7 +271,12 @@ export default function MultiStepForm() {
   const fetchOptions = async () => {
     setRefreshingOptions(true)
     try {
-      const response = await fetch('/api/options')
+      const response = await fetch(`/api/options?t=${Date.now()}`, {
+        cache: 'no-store',
+        headers: {
+          'Cache-Control': 'no-cache'
+        }
+      })
       const data = await response.json()
       
       if (!response.ok) {

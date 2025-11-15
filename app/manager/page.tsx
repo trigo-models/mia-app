@@ -34,7 +34,12 @@ export default function ManagerDashboard() {
   const fetchProjects = async () => {
     try {
       setLoading(true)
-      const response = await fetch('/api/projects')
+      const response = await fetch(`/api/projects?t=${Date.now()}`, {
+        cache: 'no-store',
+        headers: {
+          'Cache-Control': 'no-cache'
+        }
+      })
       const data = await response.json()
       
       if (data.success) {
@@ -432,6 +437,7 @@ function CreateProjectModal({ onClose, onSuccess }: { onClose: () => void, onSuc
     </div>
   )
 }
+
 
 
 

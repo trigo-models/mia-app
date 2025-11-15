@@ -66,7 +66,7 @@ export async function GET() {
       }, { status: 500 })
     }
 
-    return NextResponse.json({
+    const response = NextResponse.json({
       factories,
       teamLeaders,
       teamMembers,
@@ -74,6 +74,13 @@ export async function GET() {
       projects,
       ...(Object.keys(errors).length > 0 && { warnings: errors })
     })
+    
+    // Prevent caching to ensure fresh data
+    response.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate')
+    response.headers.set('Pragma', 'no-cache')
+    response.headers.set('Expires', '0')
+    
+    return response
   } catch (error: any) {
     console.error('Error fetching options:', error)
     return NextResponse.json(
