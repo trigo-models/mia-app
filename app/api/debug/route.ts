@@ -1,5 +1,12 @@
 import Airtable from 'airtable'
 
+type TableResult = {
+  exists: boolean
+  fields?: string[]
+  sampleRecord?: any
+  error?: string
+}
+
 export async function GET() {
   try {
     const base = new Airtable({
@@ -7,7 +14,7 @@ export async function GET() {
     }).base(process.env.AIRTABLE_BASE_ID!)
 
     // Try to fetch from each table to see what exists
-    const results = {}
+    const results: Record<string, TableResult> = {}
     
     // Test Factory Name table
     try {
@@ -18,7 +25,7 @@ export async function GET() {
         sampleRecord: factoryRecords[0]?.fields
       }
     } catch (error) {
-      results['Factory Name'] = { exists: false, error: error.message }
+      results['Factory Name'] = { exists: false, error: error instanceof Error ? error.message : String(error) }
     }
 
     // Test Leaders table
@@ -30,7 +37,7 @@ export async function GET() {
         sampleRecord: leaderRecords[0]?.fields
       }
     } catch (error) {
-      results['Leaders'] = { exists: false, error: error.message }
+      results['Leaders'] = { exists: false, error: error instanceof Error ? error.message : String(error) }
     }
 
     // Test team table
@@ -42,7 +49,7 @@ export async function GET() {
         sampleRecord: teamRecords[0]?.fields
       }
     } catch (error) {
-      results['team'] = { exists: false, error: error.message }
+      results['team'] = { exists: false, error: error instanceof Error ? error.message : String(error) }
     }
 
     // Try some common table name variations
@@ -57,7 +64,7 @@ export async function GET() {
           sampleRecord: records[0]?.fields
         }
       } catch (error) {
-        results[name] = { exists: false, error: error.message }
+        results[name] = { exists: false, error: error instanceof Error ? error.message : String(error) }
       }
     }
     
@@ -68,7 +75,7 @@ export async function GET() {
   } catch (error) {
     return Response.json({
       success: false,
-      error: error.message
+      error: error instanceof Error ? error.message : String(error)
     }, { status: 500 })
   }
 }
