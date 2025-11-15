@@ -3,6 +3,14 @@ import { supabase } from '@/lib/supabase'
 
 export async function GET() {
   try {
+    // Check if Supabase is configured
+    if (!process.env.SUPABASE_URL || !process.env.SUPABASE_ANON_KEY) {
+      return NextResponse.json({
+        error: 'Supabase environment variables are not configured',
+        details: 'Please set SUPABASE_URL and SUPABASE_ANON_KEY in your Vercel environment variables'
+      }, { status: 500 })
+    }
+
     // Fetch all options from Supabase - using lowercase 'name' to match actual schema
     const [factoriesRes, leadersRes, teamRes, projectsResRaw] = await Promise.all([
       supabase.from('factory_name').select('name'),

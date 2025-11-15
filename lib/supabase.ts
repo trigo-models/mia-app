@@ -1,18 +1,25 @@
 import { createClient } from '@supabase/supabase-js'
 
 // Initialize Supabase client
-const supabaseUrl = process.env.SUPABASE_URL || ''
-const supabaseKey = process.env.SUPABASE_ANON_KEY || ''
+const supabaseUrl = process.env.SUPABASE_URL
+const supabaseKey = process.env.SUPABASE_ANON_KEY
 
-// Only log warning, don't throw - let individual queries handle errors
+// Validate environment variables
 if (!supabaseUrl || !supabaseKey) {
-  console.warn('⚠️ Missing Supabase environment variables:')
-  console.warn('SUPABASE_URL:', supabaseUrl ? 'Set' : 'Missing')
-  console.warn('SUPABASE_ANON_KEY:', supabaseKey ? 'Set' : 'Missing')
-  console.warn('Please check your .env.local file.')
+  const missing = []
+  if (!supabaseUrl) missing.push('SUPABASE_URL')
+  if (!supabaseKey) missing.push('SUPABASE_ANON_KEY')
+  
+  console.error('❌ Missing Supabase environment variables:', missing.join(', '))
+  console.error('Please set these in your Vercel environment variables or .env.local file')
+  
+  // In production/build, we should fail fast
+  if (process.env.NODE_ENV === 'production') {
+    throw new Error(`Missing required Supabase environment variables: ${missing.join(', ')}`)
+  }
 }
 
-// Create Supabase client - simple configuration
+// Create Supabase client
 export const supabase = createClient(
   supabaseUrl || 'https://placeholder.supabase.co', 
   supabaseKey || 'placeholder-key'
