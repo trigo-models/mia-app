@@ -49,7 +49,7 @@ export default function ViewRecordModal({
     { value: 'בוטל', label: 'בוטל' }
   ]
 
-  const getFieldMappings = () => {
+  const getFieldMappings = (): { [key: string]: string } => {
     return {
       'fac_name': 'שם המפעל',
       'element': 'איזור ספציפי',
