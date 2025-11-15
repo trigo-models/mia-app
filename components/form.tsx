@@ -8,6 +8,7 @@ import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { ButtonSelect } from '@/components/ui/button-select'
 import { Textarea } from '@/components/ui/textarea'
+import { RefreshCw } from 'lucide-react'
 
 type TaskType =
   | 'construction'
@@ -265,45 +266,50 @@ export default function MultiStepForm() {
     Partial<Record<TaskType, Record<string, Partial<Record<keyof TaskEntry, string>>>>>
   >({})
   const [taskValidationMessage, setTaskValidationMessage] = useState<string | null>(null)
+  const [refreshingOptions, setRefreshingOptions] = useState(false)
+
+  const fetchOptions = async () => {
+    setRefreshingOptions(true)
+    try {
+      const response = await fetch('/api/options')
+      const data = await response.json()
+      
+      if (!response.ok) {
+        console.error('API Error:', data)
+        if (data.error) {
+          console.error('Error message:', data.error)
+          console.error('Error details:', data.details)
+        }
+        return
+      }
+      
+      if (data) {
+        setOptions({
+          factories: data.factories || [],
+          teamLeaders: data.teamLeaders || [],
+          teamMembers: data.teamMembers || [],
+          owners: data.owners || [],
+          projects: data.projects || []
+        })
+        console.log('Fetched options:', {
+          factories: data.factories?.length || 0,
+          teamLeaders: data.teamLeaders?.length || 0,
+          teamMembers: data.teamMembers?.length || 0,
+          projects: data.projects?.length || 0
+        })
+        
+        if (data.warnings) {
+          console.warn('Warnings from API:', data.warnings)
+        }
+      }
+    } catch (error) {
+      console.error('Error fetching options:', error)
+    } finally {
+      setRefreshingOptions(false)
+    }
+  }
 
   useEffect(() => {
-    const fetchOptions = async () => {
-      try {
-        const response = await fetch('/api/options')
-        const data = await response.json()
-        
-        if (!response.ok) {
-          console.error('API Error:', data)
-          if (data.error) {
-            console.error('Error message:', data.error)
-            console.error('Error details:', data.details)
-          }
-          return
-        }
-        
-        if (data) {
-          setOptions({
-            factories: data.factories || [],
-            teamLeaders: data.teamLeaders || [],
-            teamMembers: data.teamMembers || [],
-            owners: data.owners || [],
-            projects: data.projects || []
-          })
-          console.log('Fetched options:', {
-            factories: data.factories?.length || 0,
-            teamLeaders: data.teamLeaders?.length || 0,
-            teamMembers: data.teamMembers?.length || 0,
-            projects: data.projects?.length || 0
-          })
-          
-          if (data.warnings) {
-            console.warn('Warnings from API:', data.warnings)
-          }
-        }
-      } catch (error) {
-        console.error('Error fetching options:', error)
-      }
-    }
     fetchOptions()
   }, [])
 
@@ -359,19 +365,22 @@ export default function MultiStepForm() {
   }, [clausesByCategory, formData.selectedTaskType])
 
   const updateFormData = (field: keyof FormData, value: any) => {
-    setFormData(prev => ({ ...prev, [field]: value }))
-    if (errors[field]) {
-      setErrors(prev => ({ ...prev, [field]: undefined }))
-    }
     // Clear project selection when factory changes
     if (field === 'factoryName') {
       console.log('Factory selected:', value)
-      console.log('Available projects:', options.projects.filter(p => p.factory_name === value))
       setFormData(prev => ({ ...prev, [field]: value, projectId: '' }))
       // Clear project error when factory changes
       if (errors.projectId) {
         setErrors(prev => ({ ...prev, projectId: undefined }))
       }
+      // Refresh projects when factory changes to get latest data
+      fetchOptions()
+    } else {
+      setFormData(prev => ({ ...prev, [field]: value }))
+    }
+    
+    if (errors[field]) {
+      setErrors(prev => ({ ...prev, [field]: undefined }))
     }
 
     if (field === 'selectedTaskType') {
@@ -665,7 +674,23 @@ export default function MultiStepForm() {
         </div>
 
         <div className="space-y-3">
-          <Label htmlFor="projectId" className="text-base font-semibold hebrew-text text-right block">שיוך לפרויקט *</Label>
+          <div className="flex items-center justify-between">
+            <Label htmlFor="projectId" className="text-base font-semibold hebrew-text text-right block">שיוך לפרויקט *</Label>
+            {formData.factoryName && (
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                onClick={fetchOptions}
+                disabled={refreshingOptions}
+                className="text-xs hebrew-text"
+                title="רענן רשימת פרויקטים"
+              >
+                <RefreshCw className={`h-3 w-3 ml-1 ${refreshingOptions ? 'animate-spin' : ''}`} />
+                רענן
+              </Button>
+            )}
+          </div>
           <Select 
             value={formData.projectId || ''} 
             onValueChange={(value) => updateFormData('projectId', value)}
