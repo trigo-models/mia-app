@@ -22,7 +22,7 @@ interface RecordModalProps {
 }
 
 // Define Hebrew field mappings
-const getFieldMappings = (): Record<string, string> => {
+const getFieldMappings = (): { [key: string]: string } => {
   return {
     'fac_name': 'שם המפעל',
     'element': 'אלמנט',
