@@ -66,7 +66,7 @@ export async function POST(request: NextRequest) {
     
     // Add date/time fields using safe function
     if (formData.dateMade) {
-      addFieldSafely(fields, 'date_made', formData.dateMade, false)
+      addFieldSafely(fields, 'date_made', formData.dateMade)
     }
     if (formData.startTime) {
       // Convert time to Airtable format with timezone adjustment
@@ -75,7 +75,7 @@ export async function POST(request: NextRequest) {
       const adjustedHours = (parseInt(hours) - 3 + 24) % 24
       const adjustedTime = `${adjustedHours.toString().padStart(2, '0')}:${minutes}`
       const startDateTime = `${formData.dateMade}T${adjustedTime}:00.000Z`
-      addFieldSafely(fields, 'start_time', startDateTime, false)
+      addFieldSafely(fields, 'start_time', startDateTime)
     }
     if (formData.endTime) {
       // Convert time to Airtable format with timezone adjustment
@@ -84,7 +84,7 @@ export async function POST(request: NextRequest) {
       const adjustedHours = (parseInt(hours) - 3 + 24) % 24
       const adjustedTime = `${adjustedHours.toString().padStart(2, '0')}:${minutes}`
       const endDateTime = `${formData.dateMade}T${adjustedTime}:00.000Z`
-      addFieldSafely(fields, 'end_time', endDateTime, false)
+      addFieldSafely(fields, 'end_time', endDateTime)
     }
     
     // Add conditional fields only if they have values
@@ -94,13 +94,13 @@ export async function POST(request: NextRequest) {
         addFieldSafely(fields, 'contruction_tons', parseFloat(formData.constructionTons))
       }
       if (formData.constructionType) {
-        addFieldSafely(fields, 'construction_type', formData.constructionType, false)
+        addFieldSafely(fields, 'construction_type', formData.constructionType)
       }
       if (formData.constructionDescription) {
-        addFieldSafely(fields, 'construction_description', formData.constructionDescription, false)
+        addFieldSafely(fields, 'construction_description', formData.constructionDescription)
       }
       if (formData.constructionImage) {
-        addFieldSafely(fields, 'construction_image', formData.constructionImage, false)
+        addFieldSafely(fields, 'construction_image', formData.constructionImage)
       }
     }
     
@@ -120,35 +120,35 @@ export async function POST(request: NextRequest) {
     
         // Add new fields - these will be included if they exist in Airtable
         if (formData.hasSteps !== undefined) {
-          addFieldSafely(fields, 'is_steps', formData.hasSteps, false)
+          addFieldSafely(fields, 'is_steps', formData.hasSteps)
           if (formData.hasSteps && formData.stepQty) {
-            addFieldSafely(fields, 'steps_qty', formData.stepQty, false)
+            addFieldSafely(fields, 'steps_qty', formData.stepQty)
           }
           if (formData.hasSteps && formData.stepSize) {
-            addFieldSafely(fields, 'step_size', formData.stepSize, false)
+            addFieldSafely(fields, 'step_size', formData.stepSize)
           }
         }
         
         if (formData.hasBolts !== undefined) {
-          addFieldSafely(fields, 'is_bolts', formData.hasBolts, false)
+          addFieldSafely(fields, 'is_bolts', formData.hasBolts)
           if (formData.hasBolts && formData.boltQty) {
-            addFieldSafely(fields, 'bolt_qty', formData.boltQty, false)
+            addFieldSafely(fields, 'bolt_qty', formData.boltQty)
           }
           if (formData.hasBolts && formData.boltType) {
-            addFieldSafely(fields, 'bolt_type', formData.boltType, false)
+            addFieldSafely(fields, 'bolt_type', formData.boltType)
           }
         }
         
         // Add job description field
         if (formData.jobDesc) {
-          addFieldSafely(fields, 'job_desc', formData.jobDesc, false)
+          addFieldSafely(fields, 'job_desc', formData.jobDesc)
         }
         
         // Add disconnections fields
         if (formData.hasDisconnections !== undefined) {
-          addFieldSafely(fields, 'is_distons', formData.hasDisconnections, false)
+          addFieldSafely(fields, 'is_distons', formData.hasDisconnections)
           if (formData.hasDisconnections && formData.disconnectedTons) {
-            addFieldSafely(fields, 'disconnected_tons', parseFloat(formData.disconnectedTons), false)
+            addFieldSafely(fields, 'disconnected_tons', parseFloat(formData.disconnectedTons))
           }
         }
 
