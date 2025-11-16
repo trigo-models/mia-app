@@ -268,10 +268,16 @@ export default function MultiStepForm() {
   const [taskValidationMessage, setTaskValidationMessage] = useState<string | null>(null)
   const [refreshingOptions, setRefreshingOptions] = useState(false)
 
-  const fetchOptions = async () => {
+  const fetchOptions = async (factory?: string) => {
     setRefreshingOptions(true)
     try {
-      const response = await fetch(`/api/options?t=${Date.now()}`, {
+      const query = new URLSearchParams()
+      query.set('t', String(Date.now()))
+      if (factory) {
+        query.set('factory', factory)
+        query.set('onlyOpen', 'true')
+      }
+      const response = await fetch(`/api/options?${query.toString()}`, {
         cache: 'no-store',
         headers: {
           'Cache-Control': 'no-cache'
@@ -379,7 +385,7 @@ export default function MultiStepForm() {
         setErrors(prev => ({ ...prev, projectId: undefined }))
       }
       // Refresh projects when factory changes to get latest data
-      fetchOptions()
+      fetchOptions(value)
     } else {
       setFormData(prev => ({ ...prev, [field]: value }))
     }

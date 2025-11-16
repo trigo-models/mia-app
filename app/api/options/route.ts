@@ -1,7 +1,7 @@
-import { NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { supabase } from '@/lib/supabase'
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
     // Check if Supabase is configured
     if (!process.env.SUPABASE_URL || !process.env.SUPABASE_ANON_KEY) {
@@ -11,12 +11,30 @@ export async function GET() {
       }, { status: 500 })
     }
 
+    const { searchParams } = new URL(request.url)
+    const factoryFilter = searchParams.get('factory') || undefined
+    const onlyOpen = (searchParams.get('onlyOpen') || '').toLowerCase() === 'true'
+    const statusFilter = searchParams.get('status') || (onlyOpen ? 'active' : undefined)
+
     // Fetch all options from Supabase - using lowercase 'name' to match actual schema
     const [factoriesRes, leadersRes, teamRes, projectsResRaw] = await Promise.all([
       supabase.from('factory_name').select('name'),
       supabase.from('leaders').select('name'),
       supabase.from('team').select('name'),
-      supabase.from('projects').select('id, project_name, project_number, factory_name')
+      // Build projects query with optional filters
+      (async () => {
+        let query = supabase
+          .from('projects')
+          .select('id, project_name, project_number, factory_name, status')
+
+        if (factoryFilter) {
+          query = query.eq('factory_name', factoryFilter)
+        }
+        if (statusFilter) {
+          query = query.eq('status', statusFilter)
+        }
+        return await query
+      })()
     ])
     
     // Transform projects data
@@ -63,7 +81,8 @@ export async function GET() {
       teamMembersCount: teamMembers.length,
       projectsCount: projects.length,
       projectIds: projects.map((p: any) => p.id),
-      projectNames: projects.map((p: any) => p.name)
+      projectNames: projects.map((p: any) => p.name),
+      filters: { factoryFilter, statusFilter }
     })
 
     // If there are errors but we got some data, still return it
