@@ -692,7 +692,7 @@ export default function MultiStepForm() {
                 type="button"
                 variant="ghost"
                 size="sm"
-                onClick={fetchOptions}
+                onClick={() => fetchOptions(formData.factoryName || undefined)}
                 disabled={refreshingOptions}
                 className="text-xs hebrew-text"
                 title="רענן רשימת פרויקטים"
