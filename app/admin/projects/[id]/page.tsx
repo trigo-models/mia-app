@@ -956,7 +956,7 @@ export default function ProjectDetails() {
                 <div className="flex items-center gap-2 text-sm text-gray-500 hebrew-text">
                   <span>בוצע חשבון</span>
                 </div>
-                <div className="flex items-center gap-2">
+                <div className="flex items-center">
                   <Checkbox
                     checked={project.invoice_completed || false}
                     onCheckedChange={async (checked) => {
@@ -980,9 +980,6 @@ export default function ProjectDetails() {
                     }}
                     className="h-5 w-5"
                   />
-                  <span className="text-base font-semibold text-gray-900 hebrew-text">
-                    {project.invoice_completed ? 'כן' : 'לא'}
-                  </span>
                 </div>
               </div>
             </div>

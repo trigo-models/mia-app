@@ -9,6 +9,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { AdminPageHeader, AdminStatCard, AdminDataTable, AdminEmptyState, StatusBadge } from '@/components/admin/ui'
 import { Plus, Trash2, X, LogOut, ArrowRight } from 'lucide-react'
+import { Checkbox } from '@/components/ui/checkbox'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { STATUS_LABELS, normalizeStatusKey } from '@/lib/admin-ui'
@@ -22,6 +23,7 @@ interface Project {
   project_description: string
   start_date: string
   status: string
+  invoice_completed?: boolean
   created_at: string
 }
 
@@ -53,6 +55,7 @@ export default function AdminProjectsPage() {
   const [submitting, setSubmitting] = useState(false)
   const [selectedFactory, setSelectedFactory] = useState<string>('all')
   const [selectedStatus, setSelectedStatus] = useState<'all' | keyof typeof STATUS_LABELS>('all')
+  const [selectedInvoiceStatus, setSelectedInvoiceStatus] = useState<'all' | 'completed' | 'not_completed'>('all')
 
   useEffect(() => {
     fetchProjects()
@@ -192,9 +195,12 @@ export default function AdminProjectsPage() {
       const factoryMatch = selectedFactory === 'all' || project.factory_name === selectedFactory
       const statusKey = normalizeStatusKey(project.status)
       const statusMatch = selectedStatus === 'all' || statusKey === selectedStatus
-      return factoryMatch && statusMatch
+      const invoiceMatch = selectedInvoiceStatus === 'all' || 
+        (selectedInvoiceStatus === 'completed' && project.invoice_completed === true) ||
+        (selectedInvoiceStatus === 'not_completed' && (project.invoice_completed === false || project.invoice_completed === undefined))
+      return factoryMatch && statusMatch && invoiceMatch
     })
-  }, [projects, selectedFactory, selectedStatus])
+  }, [projects, selectedFactory, selectedStatus, selectedInvoiceStatus])
 
   const STATUS_ORDER: Array<keyof typeof STATUS_LABELS> = ['active', 'completed', 'paused', 'cancelled']
 
@@ -272,6 +278,21 @@ export default function AdminProjectsPage() {
       header: 'סטטוס',
       render: (project: Project) => <StatusBadge status={project.status} />,
       className: 'whitespace-nowrap',
+    },
+    {
+      key: 'invoice_completed',
+      header: 'בוצע חשבון',
+      render: (project: Project) => (
+        <div className="flex items-center justify-center">
+          <Checkbox
+            checked={project.invoice_completed || false}
+            disabled
+            className="h-4 w-4"
+          />
+        </div>
+      ),
+      className: 'whitespace-nowrap',
+      align: 'center' as const,
     },
     {
       key: 'created_at',
@@ -412,6 +433,28 @@ export default function AdminProjectsPage() {
                 </SelectContent>
               </Select>
             </div>
+          <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 w-full sm:w-auto">
+            <div className="text-sm font-medium text-gray-600 hebrew-text">סינון לפי בוצע חשבון</div>
+            <Select
+              value={selectedInvoiceStatus}
+              onValueChange={(value) => setSelectedInvoiceStatus(value as 'all' | 'completed' | 'not_completed')}
+            >
+              <SelectTrigger className="w-full sm:w-48 hebrew-text flex-row-reverse">
+                <SelectValue placeholder="בחר סטטוס חשבון" className="text-right" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all" className="hebrew-text text-right justify-end">
+                  הכל
+                </SelectItem>
+                <SelectItem value="completed" className="hebrew-text text-right justify-end">
+                  בוצע
+                </SelectItem>
+                <SelectItem value="not_completed" className="hebrew-text text-right justify-end">
+                  לא בוצע
+                </SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
 
           <div className="text-sm text-gray-500 hebrew-text sm:mr-auto">
               מציג {filteredProjects.length} מתוך {projects.length} פרויקטים
