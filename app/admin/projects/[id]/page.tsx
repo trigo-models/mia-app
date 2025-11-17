@@ -12,6 +12,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { AdminDataTable, AdminEmptyState } from '@/components/admin/ui'
 import { Calendar, Building2, MapPin, FileText, Download, Eye, Trash2, Users, User, Tag, Image as ImageIcon, Package, Clock } from 'lucide-react'
+import { Checkbox } from '@/components/ui/checkbox'
 
 interface Project {
   id: string
@@ -22,6 +23,7 @@ interface Project {
   start_date?: string
   status: string
   project_number?: string
+  invoice_completed?: boolean
   created_at: string
   updated_at: string
 }
@@ -948,6 +950,40 @@ export default function ProjectDetails() {
                     </span>
                   </div>
                 )}
+              </div>
+
+              <div className="space-y-1">
+                <div className="flex items-center gap-2 text-sm text-gray-500 hebrew-text">
+                  <span>בוצע חשבון</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Checkbox
+                    checked={project.invoice_completed || false}
+                    onCheckedChange={async (checked) => {
+                      try {
+                        const updateData: any = { invoice_completed: checked }
+                        const response = await fetch(`/api/projects/${projectId}`, {
+                          method: 'PATCH',
+                          headers: { 'Content-Type': 'application/json' },
+                          body: JSON.stringify(updateData),
+                        })
+                        const data = await response.json()
+                        if (data.success) {
+                          setProject(data.project)
+                        } else {
+                          alert('שגיאה בעדכון: ' + (data.error || 'שגיאה לא ידועה'))
+                        }
+                      } catch (err) {
+                        console.error('Error saving invoice_completed:', err)
+                        alert('שגיאה בעדכון בוצע חשבון')
+                      }
+                    }}
+                    className="h-5 w-5"
+                  />
+                  <span className="text-base font-semibold text-gray-900 hebrew-text">
+                    {project.invoice_completed ? 'כן' : 'לא'}
+                  </span>
+                </div>
               </div>
             </div>
           </CardContent>

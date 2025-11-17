@@ -97,6 +97,9 @@ export async function PATCH(
       // Convert Hebrew status to English if needed
       updateData.status = statusMap[body.status] || body.status
     }
+    if (body.invoice_completed !== undefined) {
+      updateData.invoice_completed = body.invoice_completed
+    }
     
     const { data: project, error } = await supabase
       .from('projects')
