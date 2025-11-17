@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server'
 import { supabase } from '@/lib/supabase'
 
-export async function GET() {
+export async function GET(request: Request) {
   try {
     // Check if Supabase is configured
     if (!process.env.SUPABASE_URL || !process.env.SUPABASE_ANON_KEY) {
@@ -11,20 +11,37 @@ export async function GET() {
       }, { status: 500 })
     }
 
-    console.log('Fetching projects from Supabase...')
+    // Get query parameters
+    const { searchParams } = new URL(request.url)
+    const limit = parseInt(searchParams.get('limit') || '30')
+    const offset = parseInt(searchParams.get('offset') || '0')
+
+    console.log('Fetching projects from Supabase...', { limit, offset })
     console.log('Supabase URL:', process.env.SUPABASE_URL?.substring(0, 30) + '...')
     
+    // Get total count
+    const { count: totalCount, error: countError } = await supabase
+      .from('projects')
+      .select('*', { count: 'exact', head: true })
+
+    if (countError) {
+      console.error('Supabase count error:', countError)
+      throw countError
+    }
+
+    // Get paginated projects
     const { data: projects, error } = await supabase
       .from('projects')
       .select('*')
       .order('created_at', { ascending: false })
+      .range(offset, offset + limit - 1)
 
     if (error) {
       console.error('Supabase error:', error)
       throw error
     }
 
-    console.log(`Fetched ${projects?.length || 0} projects from Supabase`)
+    console.log(`Fetched ${projects?.length || 0} projects from Supabase (offset: ${offset}, limit: ${limit})`)
     if (projects && projects.length > 0) {
       console.log('Sample project IDs:', projects.slice(0, 3).map(p => p.id))
       console.log('Sample project names:', projects.slice(0, 3).map(p => p.project_name))
@@ -34,6 +51,8 @@ export async function GET() {
       success: true,
       projects: projects || [],
       count: projects?.length || 0,
+      totalCount: totalCount || 0,
+      hasMore: (offset + (projects?.length || 0)) < (totalCount || 0),
       supabaseUrl: process.env.SUPABASE_URL?.substring(0, 30) + '...' // For debugging
     })
     

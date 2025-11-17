@@ -42,6 +42,10 @@ const formatDate = (date?: string) => {
 export default function AdminProjectsPage() {
   const [projects, setProjects] = useState<Project[]>([])
   const [loading, setLoading] = useState(true)
+  const [loadingMore, setLoadingMore] = useState(false)
+  const [totalCount, setTotalCount] = useState(0)
+  const [hasMore, setHasMore] = useState(false)
+  const [currentOffset, setCurrentOffset] = useState(0)
   const [options, setOptions] = useState<Options>({ factories: [] })
   const [showAddForm, setShowAddForm] = useState(false)
   const router = useRouter()
@@ -58,14 +62,33 @@ export default function AdminProjectsPage() {
   const [selectedInvoiceStatus, setSelectedInvoiceStatus] = useState<'all' | 'completed' | 'not_completed'>('all')
 
   useEffect(() => {
-    fetchProjects()
+    fetchProjects(true)
     fetchOptions()
   }, [])
 
-  const fetchProjects = async () => {
+  // Reset pagination when filters change
+  useEffect(() => {
+    // Skip on initial load (handled by first useEffect)
+    const timer = setTimeout(() => {
+      fetchProjects(true)
+    }, 100)
+    return () => clearTimeout(timer)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedFactory, selectedStatus, selectedInvoiceStatus])
+
+  const fetchProjects = async (reset: boolean = false) => {
     try {
-      setLoading(true)
-      const response = await fetch(`/api/projects?t=${Date.now()}`, {
+      if (reset) {
+        setLoading(true)
+        setCurrentOffset(0)
+      } else {
+        setLoadingMore(true)
+      }
+
+      const offset = reset ? 0 : currentOffset
+      const limit = 30
+      
+      const response = await fetch(`/api/projects?limit=${limit}&offset=${offset}&t=${Date.now()}`, {
         cache: 'no-store',
         headers: {
           'Cache-Control': 'no-cache'
@@ -74,12 +97,26 @@ export default function AdminProjectsPage() {
       const data = await response.json()
       
       if (data.success) {
-        setProjects(data.projects || [])
+        if (reset) {
+          setProjects(data.projects || [])
+        } else {
+          setProjects(prev => [...prev, ...(data.projects || [])])
+        }
+        setTotalCount(data.totalCount || 0)
+        setHasMore(data.hasMore || false)
+        setCurrentOffset(offset + (data.projects?.length || 0))
       }
     } catch (error) {
       console.error('Error fetching projects:', error)
     } finally {
       setLoading(false)
+      setLoadingMore(false)
+    }
+  }
+
+  const loadMoreProjects = () => {
+    if (!loadingMore && hasMore) {
+      fetchProjects(false)
     }
   }
 
@@ -133,7 +170,7 @@ export default function AdminProjectsPage() {
           project_description: '',
           start_date: ''
         })
-        fetchProjects()
+        fetchProjects(true)
       } else {
         alert(`שגיאה: ${data.error || 'שגיאה לא ידועה'}`)
       }
@@ -157,7 +194,7 @@ export default function AdminProjectsPage() {
 
       if (response.ok) {
         alert('הפרויקט נמחק בהצלחה!')
-        fetchProjects()
+        fetchProjects(true)
       } else {
         alert('שגיאה במחיקת הפרויקט')
       }
@@ -457,7 +494,7 @@ export default function AdminProjectsPage() {
           </div>
 
           <div className="text-sm text-gray-500 hebrew-text sm:mr-auto">
-              מציג {filteredProjects.length} מתוך {projects.length} פרויקטים
+              מציג {filteredProjects.length} מתוך {projects.length} נטענו ({totalCount} סה"כ)
           </div>
         </div>
 
@@ -478,11 +515,24 @@ export default function AdminProjectsPage() {
             }
           />
         ) : (
-          <AdminDataTable
-            data={filteredProjects}
-            columns={projectColumns}
-            rowKey={(project) => project.id}
-          />
+          <>
+            <AdminDataTable
+              data={filteredProjects}
+              columns={projectColumns}
+              rowKey={(project) => project.id}
+            />
+            {hasMore && (
+              <div className="mt-6 flex justify-center">
+                <Button
+                  onClick={loadMoreProjects}
+                  disabled={loadingMore}
+                  className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg transition-colors hebrew-text disabled:opacity-50"
+                >
+                  {loadingMore ? 'טוען...' : 'טען פרויקטים נוספים'}
+                </Button>
+              </div>
+            )}
+          </>
         )}
 
         {/* Add Project Modal */}
