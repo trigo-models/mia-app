@@ -25,7 +25,7 @@ export async function GET(request: NextRequest) {
       (async () => {
         let query = supabase
           .from('projects')
-          .select('id, project_name, project_number, factory_name, status')
+          .select('id, project_name, project_number, factory_name, status, specific_area')
 
         if (factoryFilter) {
           query = query.eq('factory_name', factoryFilter)
@@ -45,7 +45,8 @@ export async function GET(request: NextRequest) {
             id: p.id,
             name: p.project_name,
             project_number: p.project_number,
-            factory_name: p.factory_name
+            factory_name: p.factory_name,
+            specific_area: p.specific_area
           }))
         }
       : projectsResRaw

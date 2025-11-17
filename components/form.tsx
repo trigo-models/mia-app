@@ -256,7 +256,7 @@ export default function MultiStepForm() {
     teamLeaders: [] as string[],
     teamMembers: [] as string[],
     owners: [] as string[],
-    projects: [] as { id: string; name: string; project_number?: string; factory_name?: string }[]
+    projects: [] as { id: string; name: string; project_number?: string; factory_name?: string; specific_area?: string | null }[]
   })
   const [clausesByCategory, setClausesByCategory] = useState<Partial<Record<TaskType, ClauseOption[]>>>({})
   const [clausesLoadingCategory, setClausesLoadingCategory] = useState<TaskType | null>(null)
@@ -718,7 +718,7 @@ export default function MultiStepForm() {
                   <SelectItem key={project.id} value={project.id} className="text-right hebrew-text" dir="rtl">
                     <span className="font-mono text-blue-600 font-bold">{project.project_number}</span>
                     {project.project_number && <span className="mx-2">-</span>}
-                    <span>{project.name}</span>
+                    <span>{project.specific_area || project.name}</span>
                   </SelectItem>
                 ))}
             </SelectContent>
