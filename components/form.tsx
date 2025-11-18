@@ -33,7 +33,7 @@ interface ClauseOption {
   description?: string | null
 }
 
-type MeasurementUnit = 'טון' | 'מטר רבוע' | 'מטר אורך' | 'יחידה' | ''
+type MeasurementUnit = 'קילוגרם' | 'מטר רבוע' | 'מטר אורך' | 'יחידה' | ''
 
 interface ManpowerPerson {
   localId: string
@@ -232,7 +232,7 @@ const TASK_OPTIONS: TaskOption[] = [
   }
 ]
 
-const MEASUREMENT_UNITS: MeasurementUnit[] = ['טון', 'מטר רבוע', 'מטר אורך', 'יחידה', '']
+const MEASUREMENT_UNITS: MeasurementUnit[] = ['קילוגרם', 'מטר רבוע', 'מטר אורך', 'יחידה', '']
 
 const TASK_CATEGORY_LABELS: Record<TaskType, string> = TASK_OPTIONS.reduce((acc, option) => {
   acc[option.id] = option.label
