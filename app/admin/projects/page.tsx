@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useMemo } from 'react'
+import { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -12,7 +12,7 @@ import { Plus, Trash2, X, LogOut, ArrowRight } from 'lucide-react'
 import { Checkbox } from '@/components/ui/checkbox'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { STATUS_LABELS, normalizeStatusKey } from '@/lib/admin-ui'
+import { STATUS_LABELS } from '@/lib/admin-ui'
 
 interface Project {
   id: string
@@ -43,7 +43,7 @@ export default function AdminProjectsPage() {
   const [projects, setProjects] = useState<Project[]>([])
   const [loading, setLoading] = useState(true)
   const [loadingMore, setLoadingMore] = useState(false)
-  const [totalCount, setTotalCount] = useState(0)
+  const [filteredCount, setFilteredCount] = useState(0)
   const [hasMore, setHasMore] = useState(false)
   const [currentOffset, setCurrentOffset] = useState(0)
   const [options, setOptions] = useState<Options>({ factories: [] })
@@ -60,10 +60,20 @@ export default function AdminProjectsPage() {
   const [selectedFactory, setSelectedFactory] = useState<string>('all')
   const [selectedStatus, setSelectedStatus] = useState<'all' | keyof typeof STATUS_LABELS>('all')
   const [selectedInvoiceStatus, setSelectedInvoiceStatus] = useState<'all' | 'completed' | 'not_completed'>('all')
+  const [projectSummary, setProjectSummary] = useState({
+    totalProjects: 0,
+    statusCounts: {
+      active: 0,
+      completed: 0,
+      paused: 0,
+      cancelled: 0
+    }
+  })
 
   useEffect(() => {
     fetchProjects(true)
     fetchOptions()
+    fetchProjectSummary()
   }, [])
 
   // Reset pagination when filters change
@@ -88,7 +98,15 @@ export default function AdminProjectsPage() {
       const offset = reset ? 0 : currentOffset
       const limit = 30
       
-      const response = await fetch(`/api/projects?limit=${limit}&offset=${offset}&t=${Date.now()}`, {
+      const params = new URLSearchParams()
+      params.set('limit', String(limit))
+      params.set('offset', String(offset))
+      params.set('t', String(Date.now()))
+      if (selectedFactory !== 'all') params.set('factory', selectedFactory)
+      if (selectedStatus !== 'all') params.set('status', selectedStatus)
+      if (selectedInvoiceStatus !== 'all') params.set('invoiceStatus', selectedInvoiceStatus)
+
+      const response = await fetch(`/api/projects?${params.toString()}`, {
         cache: 'no-store',
         headers: {
           'Cache-Control': 'no-cache'
@@ -102,7 +120,7 @@ export default function AdminProjectsPage() {
         } else {
           setProjects(prev => [...prev, ...(data.projects || [])])
         }
-        setTotalCount(data.totalCount || 0)
+        setFilteredCount(data.filteredCount ?? data.count ?? 0)
         setHasMore(data.hasMore || false)
         setCurrentOffset(offset + (data.projects?.length || 0))
       }
@@ -111,6 +129,31 @@ export default function AdminProjectsPage() {
     } finally {
       setLoading(false)
       setLoadingMore(false)
+    }
+  }
+
+  const fetchProjectSummary = async () => {
+    try {
+      const response = await fetch(`/api/projects/summary?t=${Date.now()}`, {
+        cache: 'no-store',
+        headers: {
+          'Cache-Control': 'no-cache'
+        }
+      })
+      const data = await response.json()
+      if (data.success && data.summary) {
+        setProjectSummary({
+          totalProjects: data.summary.totalProjects || 0,
+          statusCounts: {
+            active: data.summary.statusCounts?.active || 0,
+            completed: data.summary.statusCounts?.completed || 0,
+            paused: data.summary.statusCounts?.paused || 0,
+            cancelled: data.summary.statusCounts?.cancelled || 0
+          }
+        })
+      }
+    } catch (error) {
+      console.error('Error fetching project summary:', error)
     }
   }
 
@@ -170,6 +213,7 @@ export default function AdminProjectsPage() {
           project_description: '',
           start_date: ''
         })
+        fetchProjectSummary()
         fetchProjects(true)
       } else {
         alert(`שגיאה: ${data.error || 'שגיאה לא ידועה'}`)
@@ -194,6 +238,7 @@ export default function AdminProjectsPage() {
 
       if (response.ok) {
         alert('הפרויקט נמחק בהצלחה!')
+        fetchProjectSummary()
         fetchProjects(true)
       } else {
         alert('שגיאה במחיקת הפרויקט')
@@ -209,35 +254,7 @@ export default function AdminProjectsPage() {
     router.replace('/admin')
   }
 
-  const statusCounts = useMemo(() => {
-    const counts: Record<string, number> = {
-      active: 0,
-      completed: 0,
-      paused: 0,
-      cancelled: 0
-    }
-
-    projects.forEach(project => {
-      const normalizedKey = normalizeStatusKey(project.status)
-      if (normalizedKey && counts.hasOwnProperty(normalizedKey)) {
-        counts[normalizedKey] += 1
-      }
-    })
-
-    return counts
-  }, [projects])
-
-  const filteredProjects = useMemo(() => {
-    return projects.filter(project => {
-      const factoryMatch = selectedFactory === 'all' || project.factory_name === selectedFactory
-      const statusKey = normalizeStatusKey(project.status)
-      const statusMatch = selectedStatus === 'all' || statusKey === selectedStatus
-      const invoiceMatch = selectedInvoiceStatus === 'all' || 
-        (selectedInvoiceStatus === 'completed' && project.invoice_completed === true) ||
-        (selectedInvoiceStatus === 'not_completed' && (project.invoice_completed === false || project.invoice_completed === undefined))
-      return factoryMatch && statusMatch && invoiceMatch
-    })
-  }, [projects, selectedFactory, selectedStatus, selectedInvoiceStatus])
+  const statusCounts = projectSummary.statusCounts
 
   const STATUS_ORDER: Array<keyof typeof STATUS_LABELS> = ['active', 'completed', 'paused', 'cancelled']
 
@@ -397,7 +414,7 @@ export default function AdminProjectsPage() {
         <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-5 gap-4">
           <AdminStatCard
             label="כל הפרויקטים"
-            value={projects.length}
+            value={projectSummary.totalProjects}
             description="סך הפרויקטים במערכת"
             accentColor="violet"
           />
@@ -494,7 +511,7 @@ export default function AdminProjectsPage() {
           </div>
 
           <div className="text-sm text-gray-500 hebrew-text sm:mr-auto">
-              מציג {filteredProjects.length} מתוך {projects.length} נטענו ({totalCount} סה"כ)
+              מציג {projects.length} מתוך {filteredCount} תוצאות מסוננות ({projectSummary.totalProjects} סה"כ במערכת)
           </div>
         </div>
 
@@ -503,7 +520,7 @@ export default function AdminProjectsPage() {
             title="טוען פרויקטים..."
             description="אנא המתן בזמן שאנו טוענים את הנתונים ממסד הנתונים."
           />
-        ) : filteredProjects.length === 0 ? (
+        ) : projects.length === 0 ? (
           <AdminEmptyState
             icon={<span className="text-4xl">📂</span>}
             title="אין פרויקטים להצגה"
@@ -517,7 +534,7 @@ export default function AdminProjectsPage() {
         ) : (
           <>
             <AdminDataTable
-              data={filteredProjects}
+              data={projects}
               columns={projectColumns}
               rowKey={(project) => project.id}
             />

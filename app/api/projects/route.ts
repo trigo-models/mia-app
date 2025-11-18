@@ -1,6 +1,39 @@
 import { NextResponse } from 'next/server'
 import { supabase } from '@/lib/supabase'
 
+const STATUS_FILTER_MAP: Record<string, string[]> = {
+  active: ['active', 'Active', 'פעיל', 'פעילה'],
+  completed: ['completed', 'complete', 'Completed', 'הסתיים', 'הסתיימה'],
+  paused: ['paused', 'pause', 'Paused', 'מוקפא', 'הוקפא'],
+  cancelled: ['cancelled', 'canceled', 'Cancelled', 'בוטל', 'בוטלה'],
+}
+
+const applyProjectFilters = (
+  query: any,
+  {
+    factory,
+    status,
+    invoiceStatus,
+  }: { factory?: string | null; status?: string | null; invoiceStatus?: string | null }
+) => {
+  if (factory && factory !== 'all') {
+    query = query.eq('factory_name', factory)
+  }
+
+  if (status && status !== 'all') {
+    const allowedValues = STATUS_FILTER_MAP[status] || [status]
+    query = query.in('status', allowedValues)
+  }
+
+  if (invoiceStatus === 'completed') {
+    query = query.eq('invoice_completed', true)
+  } else if (invoiceStatus === 'not_completed') {
+    query = query.or('invoice_completed.is.false,invoice_completed.is.null')
+  }
+
+  return query
+}
+
 export async function GET(request: Request) {
   try {
     // Check if Supabase is configured
@@ -15,6 +48,9 @@ export async function GET(request: Request) {
     const { searchParams } = new URL(request.url)
     const limit = parseInt(searchParams.get('limit') || '30')
     const offset = parseInt(searchParams.get('offset') || '0')
+    const factory = searchParams.get('factory')
+    const status = searchParams.get('status')
+    const invoiceStatus = searchParams.get('invoiceStatus')
 
     console.log('Fetching projects from Supabase...', { limit, offset })
     console.log('Supabase URL:', process.env.SUPABASE_URL?.substring(0, 30) + '...')
@@ -30,11 +66,24 @@ export async function GET(request: Request) {
     }
 
     // Get paginated projects
-    const { data: projects, error } = await supabase
-      .from('projects')
-      .select('*')
-      .order('created_at', { ascending: false })
-      .range(offset, offset + limit - 1)
+    const { count: filteredCount, error: filteredCountError } = await applyProjectFilters(
+      supabase.from('projects').select('*', { count: 'exact', head: true }),
+      { factory, status, invoiceStatus }
+    )
+
+    if (filteredCountError) {
+      console.error('Supabase filtered count error:', filteredCountError)
+      throw filteredCountError
+    }
+
+    const { data: projects, error } = await applyProjectFilters(
+      supabase
+        .from('projects')
+        .select('*')
+        .order('created_at', { ascending: false })
+        .range(offset, offset + limit - 1),
+      { factory, status, invoiceStatus }
+    )
 
     if (error) {
       console.error('Supabase error:', error)
@@ -52,7 +101,8 @@ export async function GET(request: Request) {
       projects: projects || [],
       count: projects?.length || 0,
       totalCount: totalCount || 0,
-      hasMore: (offset + (projects?.length || 0)) < (totalCount || 0),
+      filteredCount: filteredCount || 0,
+      hasMore: (offset + (projects?.length || 0)) < (filteredCount || 0),
       supabaseUrl: process.env.SUPABASE_URL?.substring(0, 30) + '...' // For debugging
     })
     
