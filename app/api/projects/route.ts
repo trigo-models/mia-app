@@ -92,8 +92,14 @@ export async function GET(request: Request) {
 
     console.log(`Fetched ${projects?.length || 0} projects from Supabase (offset: ${offset}, limit: ${limit})`)
     if (projects && projects.length > 0) {
-      console.log('Sample project IDs:', projects.slice(0, 3).map(p => p.id))
-      console.log('Sample project names:', projects.slice(0, 3).map(p => p.project_name))
+      console.log(
+        'Sample project IDs:',
+        projects.slice(0, 3).map((project: { id: string }) => project.id)
+      )
+      console.log(
+        'Sample project names:',
+        projects.slice(0, 3).map((project: { project_name?: string | null }) => project.project_name)
+      )
     }
 
     const response = NextResponse.json({
