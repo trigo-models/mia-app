@@ -955,63 +955,61 @@ export default function ProjectDetails() {
 
               <div className="space-y-1">
                 <div className="flex items-center gap-2 text-sm text-gray-500 hebrew-text">
-                  <span>בוצע חשבון</span>
+                  <span>בוצע חשבון / יצא חשבונית מס</span>
                 </div>
-                <div className="flex items-center">
-                  <Checkbox
-                    checked={project.invoice_completed || false}
-                    onCheckedChange={async (checked) => {
-                      try {
-                        const updateData: any = { invoice_completed: checked }
-                        const response = await fetch(`/api/projects/${projectId}`, {
-                          method: 'PATCH',
-                          headers: { 'Content-Type': 'application/json' },
-                          body: JSON.stringify(updateData),
-                        })
-                        const data = await response.json()
-                        if (data.success) {
-                          setProject(data.project)
-                        } else {
-                          alert('שגיאה בעדכון: ' + (data.error || 'שגיאה לא ידועה'))
+                <div className="flex items-center gap-6">
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm text-gray-600 hebrew-text">בוצע חשבון</span>
+                    <Checkbox
+                      checked={project.invoice_completed || false}
+                      onCheckedChange={async (checked) => {
+                        try {
+                          const updateData: any = { invoice_completed: checked }
+                          const response = await fetch(`/api/projects/${projectId}`, {
+                            method: 'PATCH',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(updateData),
+                          })
+                          const data = await response.json()
+                          if (data.success) {
+                            setProject(data.project)
+                          } else {
+                            alert('שגיאה בעדכון: ' + (data.error || 'שגיאה לא ידועה'))
+                          }
+                        } catch (err) {
+                          console.error('Error saving invoice_completed:', err)
+                          alert('שגיאה בעדכון בוצע חשבון')
                         }
-                      } catch (err) {
-                        console.error('Error saving invoice_completed:', err)
-                        alert('שגיאה בעדכון בוצע חשבון')
-                      }
-                    }}
-                    className="h-5 w-5"
-                  />
-                </div>
-              </div>
-
-              <div className="space-y-1">
-                <div className="flex items-center gap-2 text-sm text-gray-500 hebrew-text">
-                  <span>יצא חשבונית מס</span>
-                </div>
-                <div className="flex items-center">
-                  <Checkbox
-                    checked={project.invoice_issued || false}
-                    onCheckedChange={async (checked) => {
-                      try {
-                        const updateData: any = { invoice_issued: checked }
-                        const response = await fetch(`/api/projects/${projectId}`, {
-                          method: 'PATCH',
-                          headers: { 'Content-Type': 'application/json' },
-                          body: JSON.stringify(updateData),
-                        })
-                        const data = await response.json()
-                        if (data.success) {
-                          setProject(data.project)
-                        } else {
-                          alert('שגיאה בעדכון: ' + (data.error || 'שגיאה לא ידועה'))
+                      }}
+                      className="h-5 w-5"
+                    />
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm text-gray-600 hebrew-text">יצא חשבונית מס</span>
+                    <Checkbox
+                      checked={project.invoice_issued || false}
+                      onCheckedChange={async (checked) => {
+                        try {
+                          const updateData: any = { invoice_issued: checked }
+                          const response = await fetch(`/api/projects/${projectId}`, {
+                            method: 'PATCH',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(updateData),
+                          })
+                          const data = await response.json()
+                          if (data.success) {
+                            setProject(data.project)
+                          } else {
+                            alert('שגיאה בעדכון: ' + (data.error || 'שגיאה לא ידועה'))
+                          }
+                        } catch (err) {
+                          console.error('Error saving invoice_issued:', err)
+                          alert('שגיאה בעדכון יצא חשבונית מס')
                         }
-                      } catch (err) {
-                        console.error('Error saving invoice_issued:', err)
-                        alert('שגיאה בעדכון יצא חשבונית מס')
-                      }
-                    }}
-                    className="h-5 w-5"
-                  />
+                      }}
+                      className="h-5 w-5"
+                    />
+                  </div>
                 </div>
               </div>
             </div>
