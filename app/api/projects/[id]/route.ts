@@ -100,6 +100,9 @@ export async function PATCH(
     if (body.invoice_completed !== undefined) {
       updateData.invoice_completed = body.invoice_completed
     }
+    if (body.invoice_issued !== undefined) {
+      updateData.invoice_issued = body.invoice_issued
+    }
     
     const { data: project, error } = await supabase
       .from('projects')
