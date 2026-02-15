@@ -24,6 +24,7 @@ interface Project {
   start_date: string
   status: string
   invoice_completed?: boolean
+  invoice_issued?: boolean
   created_at: string
 }
 
@@ -60,6 +61,7 @@ export default function AdminProjectsPage() {
   const [selectedFactory, setSelectedFactory] = useState<string>('all')
   const [selectedStatus, setSelectedStatus] = useState<'all' | keyof typeof STATUS_LABELS>('all')
   const [selectedInvoiceStatus, setSelectedInvoiceStatus] = useState<'all' | 'completed' | 'not_completed'>('all')
+  const [selectedInvoiceIssued, setSelectedInvoiceIssued] = useState<'all' | 'yes' | 'no'>('all')
   const [projectSummary, setProjectSummary] = useState({
     totalProjects: 0,
     statusCounts: {
@@ -84,7 +86,7 @@ export default function AdminProjectsPage() {
     }, 100)
     return () => clearTimeout(timer)
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedFactory, selectedStatus, selectedInvoiceStatus])
+  }, [selectedFactory, selectedStatus, selectedInvoiceStatus, selectedInvoiceIssued])
 
   const fetchProjects = async (reset: boolean = false) => {
     try {
@@ -105,6 +107,7 @@ export default function AdminProjectsPage() {
       if (selectedFactory !== 'all') params.set('factory', selectedFactory)
       if (selectedStatus !== 'all') params.set('status', selectedStatus)
       if (selectedInvoiceStatus !== 'all') params.set('invoiceStatus', selectedInvoiceStatus)
+      if (selectedInvoiceIssued !== 'all') params.set('invoiceIssued', selectedInvoiceIssued)
 
       const response = await fetch(`/api/projects?${params.toString()}`, {
         cache: 'no-store',
@@ -349,6 +352,21 @@ export default function AdminProjectsPage() {
       align: 'center' as const,
     },
     {
+      key: 'invoice_issued',
+      header: 'חשבונית מס',
+      render: (project: Project) => (
+        <div className="flex items-center justify-center">
+          <Checkbox
+            checked={project.invoice_issued || false}
+            disabled
+            className="h-4 w-4"
+          />
+        </div>
+      ),
+      className: 'whitespace-nowrap',
+      align: 'center' as const,
+    },
+    {
       key: 'created_at',
       header: 'תאריך יצירה',
       render: (project: Project) => (
@@ -505,6 +523,28 @@ export default function AdminProjectsPage() {
                 </SelectItem>
                 <SelectItem value="not_completed" className="hebrew-text text-right justify-end">
                   לא בוצע
+                </SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 w-full sm:w-auto">
+            <div className="text-sm font-medium text-gray-600 hebrew-text">חשבונית מס</div>
+            <Select
+              value={selectedInvoiceIssued}
+              onValueChange={(value) => setSelectedInvoiceIssued(value as 'all' | 'yes' | 'no')}
+            >
+              <SelectTrigger className="w-full sm:w-48 hebrew-text flex-row-reverse">
+                <SelectValue placeholder="בחר חשבונית מס" className="text-right" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all" className="hebrew-text text-right justify-end">
+                  הכל
+                </SelectItem>
+                <SelectItem value="yes" className="hebrew-text text-right justify-end">
+                  כן
+                </SelectItem>
+                <SelectItem value="no" className="hebrew-text text-right justify-end">
+                  לא
                 </SelectItem>
               </SelectContent>
             </Select>

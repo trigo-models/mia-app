@@ -14,7 +14,8 @@ const applyProjectFilters = (
     factory,
     status,
     invoiceStatus,
-  }: { factory?: string | null; status?: string | null; invoiceStatus?: string | null }
+    invoiceIssued,
+  }: { factory?: string | null; status?: string | null; invoiceStatus?: string | null; invoiceIssued?: string | null }
 ) => {
   if (factory && factory !== 'all') {
     query = query.eq('factory_name', factory)
@@ -29,6 +30,12 @@ const applyProjectFilters = (
     query = query.eq('invoice_completed', true)
   } else if (invoiceStatus === 'not_completed') {
     query = query.or('invoice_completed.is.false,invoice_completed.is.null')
+  }
+
+  if (invoiceIssued === 'yes') {
+    query = query.eq('invoice_issued', true)
+  } else if (invoiceIssued === 'no') {
+    query = query.or('invoice_issued.is.false,invoice_issued.is.null')
   }
 
   return query
@@ -51,6 +58,7 @@ export async function GET(request: Request) {
     const factory = searchParams.get('factory')
     const status = searchParams.get('status')
     const invoiceStatus = searchParams.get('invoiceStatus')
+    const invoiceIssued = searchParams.get('invoiceIssued')
 
     console.log('Fetching projects from Supabase...', { limit, offset })
     console.log('Supabase URL:', process.env.SUPABASE_URL?.substring(0, 30) + '...')
@@ -68,7 +76,7 @@ export async function GET(request: Request) {
     // Get paginated projects
     const { count: filteredCount, error: filteredCountError } = await applyProjectFilters(
       supabase.from('projects').select('*', { count: 'exact', head: true }),
-      { factory, status, invoiceStatus }
+      { factory, status, invoiceStatus, invoiceIssued }
     )
 
     if (filteredCountError) {
@@ -82,7 +90,7 @@ export async function GET(request: Request) {
         .select('*')
         .order('created_at', { ascending: false })
         .range(offset, offset + limit - 1),
-      { factory, status, invoiceStatus }
+      { factory, status, invoiceStatus, invoiceIssued }
     )
 
     if (error) {
