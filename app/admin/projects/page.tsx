@@ -462,14 +462,14 @@ export default function AdminProjectsPage() {
           />
           </div>
 
-        <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:gap-4">
-          <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 w-full sm:w-auto">
-              <div className="text-sm font-medium text-gray-600 hebrew-text">סינון לפי מפעל</div>
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-3 sm:flex-nowrap">
+          <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:items-center sm:gap-2 w-full sm:w-auto">
+              <div className="text-sm font-medium text-gray-600 hebrew-text whitespace-nowrap">מפעל:</div>
               <Select
                 value={selectedFactory}
                 onValueChange={(value) => setSelectedFactory(value)}
               >
-              <SelectTrigger className="w-full sm:w-64 hebrew-text flex-row-reverse">
+              <SelectTrigger className="w-full sm:w-52 hebrew-text flex-row-reverse">
                 <SelectValue placeholder="בחר מפעל" className="text-right" />
                 </SelectTrigger>
                 <SelectContent>
@@ -484,13 +484,13 @@ export default function AdminProjectsPage() {
                 </SelectContent>
               </Select>
             </div>
-          <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 w-full sm:w-auto">
-            <div className="text-sm font-medium text-gray-600 hebrew-text">סינון לפי סטטוס</div>
+          <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:items-center sm:gap-2 w-full sm:w-auto">
+            <div className="text-sm font-medium text-gray-600 hebrew-text whitespace-nowrap">סטטוס:</div>
             <Select
               value={selectedStatus}
               onValueChange={(value) => setSelectedStatus(value as 'all' | keyof typeof STATUS_LABELS)}
             >
-              <SelectTrigger className="w-full sm:w-48 hebrew-text flex-row-reverse">
+              <SelectTrigger className="w-full sm:w-40 hebrew-text flex-row-reverse">
                 <SelectValue placeholder="בחר סטטוס" className="text-right" />
               </SelectTrigger>
               <SelectContent>
@@ -505,14 +505,14 @@ export default function AdminProjectsPage() {
                 </SelectContent>
               </Select>
             </div>
-          <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 w-full sm:w-auto">
-            <div className="text-sm font-medium text-gray-600 hebrew-text">סינון לפי בוצע חשבון</div>
+          <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:items-center sm:gap-2 w-full sm:w-auto">
+            <div className="text-sm font-medium text-gray-600 hebrew-text whitespace-nowrap">בוצע חשבון:</div>
             <Select
               value={selectedInvoiceStatus}
               onValueChange={(value) => setSelectedInvoiceStatus(value as 'all' | 'completed' | 'not_completed')}
             >
-              <SelectTrigger className="w-full sm:w-48 hebrew-text flex-row-reverse">
-                <SelectValue placeholder="בחר סטטוס חשבון" className="text-right" />
+              <SelectTrigger className="w-full sm:w-36 hebrew-text flex-row-reverse">
+                <SelectValue placeholder="בחר" className="text-right" />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all" className="hebrew-text text-right justify-end">
@@ -527,14 +527,14 @@ export default function AdminProjectsPage() {
               </SelectContent>
             </Select>
           </div>
-          <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 w-full sm:w-auto">
-            <div className="text-sm font-medium text-gray-600 hebrew-text">חשבונית מס</div>
+          <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:items-center sm:gap-2 w-full sm:w-auto">
+            <div className="text-sm font-medium text-gray-600 hebrew-text whitespace-nowrap">חשבונית מס:</div>
             <Select
               value={selectedInvoiceIssued}
               onValueChange={(value) => setSelectedInvoiceIssued(value as 'all' | 'yes' | 'no')}
             >
-              <SelectTrigger className="w-full sm:w-48 hebrew-text flex-row-reverse">
-                <SelectValue placeholder="בחר חשבונית מס" className="text-right" />
+              <SelectTrigger className="w-full sm:w-36 hebrew-text flex-row-reverse">
+                <SelectValue placeholder="בחר" className="text-right" />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all" className="hebrew-text text-right justify-end">
